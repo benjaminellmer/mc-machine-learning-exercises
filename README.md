@@ -1,1 +1,1 @@
-# mc-ml-exercises
+# Mobile Computing Machine Learning Exercises
