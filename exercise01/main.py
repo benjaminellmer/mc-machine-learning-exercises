@@ -71,7 +71,6 @@ plot_gesture_for_participant("up", 1)
 
 # %%
 import pandas as pd
-import matplotlib.pyplot as plt
 
 df = pd.read_csv("raw_gesture_data_x_axis.csv", header=None)
 
@@ -124,13 +123,51 @@ print(calculate_gesture_length_stats(participant_nr=1))
 # and 3rd quartile and inner quartile range
 gesture_plot_data = pd.DataFrame()
 
+# 4.1 Yes we can see a trend between the gesture lengths and the gesture types
+# The very primitive gestures left, right, up and down very usually very short, still we can always see some outliers,
+# which can e.g. be caused by a delayed start, as we already saw in the plots of assignment 2
+# The "longest gesture" is of course the square, which makes sense, because the square gestures consists of 4 movements
+# right, down left, and up, the second longest gesture is the triangle, which also makes sense, because it consists of
+# 3 movements.
+
 for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"]:
     gesture_plot_data[gesture] = get_gesture_length_data(gesture).values
 
 gesture_plot_data.plot.box()
 
 # %%
+import pandas as pd
+
+df = pd.read_csv("raw_gesture_data_x_axis.csv", header=None)
+
+counts_df = pd.DataFrame({
+    'label': df[0],
+    'participant_nr': df[1],
+    'acc_count': df.iloc[:, 3:].T.count(),
+})
+
+# total_count = df.notna().sum(axis=1).gt(102).sum()
+# participants_count = df.groupby(1).describe()
+
+
+# How many gestures have a length of more than 100 acceleration values in total ?
+print(len(counts_df.query("acc_count > 100")))
+
+# How many gestures have a length of more than 100 acceleration values in per participant ?
+print(counts_df.drop("label", axis=1).query("acc_count > 100").groupby("participant_nr").count())
+
+# How many gestures have a length below 100 acceleration values in total ?
+print(len(counts_df.query("acc_count < 100")))
+
+# How many gestures have a length below 100 acceleration values in per participant ?
+print(counts_df.drop("label", axis=1).query("acc_count < 100").groupby("participant_nr").count())
+
+# How many participants performed at least half of their left gestures in less than 70 acceleration values
+print(len(counts_df.query("acc_count < 70 and label == 'left'").groupby("participant_nr").count().query("acc_count > 15")))
+
+# How many participants needed more than 200 accleration values to perform at least of their square gestures
+print(len(counts_df.query("acc_count > 200 and label == 'square'").groupby("participant_nr").count().query("acc_count > 15")))
 
 # %%
 
-# %%
+#%%
