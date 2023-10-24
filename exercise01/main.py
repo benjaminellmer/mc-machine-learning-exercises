@@ -70,71 +70,67 @@ plot_gesture_for_participant("up", 1)
 
 
 # %%
+import pandas as pd
+import matplotlib.pyplot as plt
 
 df = pd.read_csv("raw_gesture_data_x_axis.csv", header=None)
 
-gesture_length_stats = pd.DataFrame(index=[
-    'Mean Length',
-    'Median Length',
-    'MAD',
-    'STD',
-    '1st Quantile',
-    '3rd Quantile',
-    'Inner Quantile Range'
-])
 
-for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"]:
-    participant_frame = df[df[1] == participant_nr]
+def get_gesture_length_data(gesture, participant_nr=None):
+    if participant_nr is None:
+        participant_frame = df
+    else:
+        participant_frame = df[df[1] == participant_nr]
+
     gesture_frame = participant_frame[participant_frame[0] == gesture]
-    gesture_acc_lengths = gesture_frame.iloc[:, 3:].T.count()
+    return gesture_frame.iloc[:, 3:].T.count()
 
-    gesture_length_stats[gesture] = [
-        gesture_acc_lengths.mean(),
-        gesture_acc_lengths.median(),
-        (gesture_acc_lengths - gesture_acc_lengths.mean()).abs().mean(),
-        gesture_acc_lengths.std(),
-        gesture_acc_lengths.quantile(0.25),
-        gesture_acc_lengths.quantile(0.75),
-        gesture_acc_lengths.quantile(0.75) - gesture_acc_lengths.quantile(0.25),
-    ]
 
-print(gesture_length_stats)
+def calculate_gesture_length_stats(participant_nr=None):
+    gesture_length_stats = pd.DataFrame(index=[
+        'Mean Length', 'Median Length',
+        'MAD',
+        'STD',
+        '1st Quantile',
+        '3rd Quantile',
+        'Inner Quantile Range'
+    ])
 
-# Concatenate the individual DataFrames into one DataFrame
-# print(result_df)
+    for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"]:
+        gesture_acc_lengths = get_gesture_length_data(gesture, participant_nr)
 
-# print(result_df.reset_index(drop=True))
+        gesture_length_stats[gesture] = [
+            gesture_acc_lengths.mean(),
+            gesture_acc_lengths.median(),
+            (gesture_acc_lengths - gesture_acc_lengths.mean()).abs().mean(),
+            gesture_acc_lengths.std(),
+            gesture_acc_lengths.quantile(0.25),
+            gesture_acc_lengths.quantile(0.75),
+            gesture_acc_lengths.quantile(0.75) - gesture_acc_lengths.quantile(0.25),
+        ]
+    return gesture_length_stats
 
-# Rename the columns to match the gestures
-# result_df.columns = gestures
 
-# print(gesture_length_stats)
-#
-# print("Left Mean Length:")
-# print(left_frame_lengths.mean())
-#
-# print("Left Median Length:")
-# print(left_frame_lengths.median())
-#
-# print("Left MAD:")
-# print((left_frame_lengths - left_frame_lengths.mean()).abs().mean())
-#
-# print("Left Standard Deviation:")
-# print(left_frame_lengths.std())
-#
-# print("1st Quantile:")
-# print(left_frame_lengths.quantile(0.25))
-#
-# print("3rd Quantile:")
-# print(left_frame_lengths.quantile(0.75))
-#
-# print("Inner Quartile Range:")
-# print(left_frame_lengths.quantile(0.75) - left_frame_lengths.quantile(0.25))
+print("----- Stats for all Participants -----")
+print(calculate_gesture_length_stats())
+
+print("----- Stats for Participant 1 -----")
+print(calculate_gesture_length_stats(participant_nr=1))
 
 # 3.1 Calculate and state the mean and median length (number of acceleration values) of each gesture type of each
 # participants
 
 # As well as per single participants together with its standard deviation median absolute deviation 1st
 # and 3rd quartile and inner quartile range
+gesture_plot_data = pd.DataFrame()
+
+for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"]:
+    gesture_plot_data[gesture] = get_gesture_length_data(gesture).values
+
+gesture_plot_data.plot.box()
+
+# %%
+
+# %%
 
 # %%
