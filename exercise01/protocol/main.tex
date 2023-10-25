@@ -1,0 +1,70 @@
+\documentclass[14pt,a4paper]{extarticle}
+\usepackage{graphicx}
+\usepackage{caption} 
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{pdfpages}
+\usepackage{libertine}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\familydefault}{\sfdefault}
+
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=blue,      
+    urlcolor=blue,
+    pdfborder={0 0 0},
+    linktocpage      
+}
+
+\definecolor{mygray}{rgb}{0.8,0.8,0.8}
+
+\lstset{
+  basicstyle=\ttfamily,
+  backgroundcolor=\color{mygray},
+}
+
+\begin{document}
+	\begin{titlepage}
+		\centering
+		{\scshape\LARGE Machine Learning \par}
+		\vspace{2.5cm}
+		{\huge\bfseries Task 1: Data Visualization}
+		\vfill
+		{\normalsize von\par}
+		{\normalsize Benjamin Ellmer (\textsc{S2210455012}) \par}
+		\vspace{1cm}
+		\includegraphics[width=0.3\textheight]{images/logo.pdf} \par
+		\vspace{1cm}
+		{\large Mobile Computing Master \par}
+		{\large FH Hagenberg \par}
+		\vfill
+		{\large \today\par}
+	\end{titlepage}
+
+
+    \section*{Task 1: Overview of the Dataset}
+
+    \noindent \textbf{How many samples and features are in the dataset ?}\\
+    Samples: 2160 \\
+    Features: 423 (Without counting participantNr and sampleNr as features) \\
+    \lstinline|df.describe()| \\
+
+    \noindent \textbf{What are the feature data types ? }\\
+    float64 \\
+
+    \noindent \textbf{Are the gestures balanced ?} \\
+    Yes, the gestures are balanced the dataset contains 270 samples for each of the 9 classes
+
+    \section*{Task 2: Visualizations}
+    \section*{Task 3: Calculations}
+    \section*{Task 4: Correlation between gesture lengths}
+    \section*{Task 5: Vectorized commands}
+
+\end{document}
+
