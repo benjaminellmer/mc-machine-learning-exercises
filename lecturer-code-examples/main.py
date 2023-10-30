@@ -6,6 +6,8 @@ print(df_iris)
 
 # STATISTICS & INFO ABOUT DATA - a few examples
 df_iris.dtypes
+
+
 df_iris.describe() # statistics
 
 # statistics about the discrete feature = the class
