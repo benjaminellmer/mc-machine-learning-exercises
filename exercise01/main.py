@@ -199,8 +199,8 @@ for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw",
 plt.title("Median Curve for all participants and all gestures")
 plt.xlabel("time")
 plt.ylabel("x accelerometer value")
-plt.savefig("plots/median_curve_all_participants.svg")
 plt.legend()
+plt.savefig("plots/median_curve_all_participants.svg")
 plt.show()
 
 for participant_nr in range(9):
@@ -210,8 +210,8 @@ for participant_nr in range(9):
     plt.title(f"Median Curve for participant {participant_nr} and all gestures")
     plt.xlabel("time")
     plt.ylabel("x accelerometer value")
-    plt.savefig(f"plots/median_curve_participant_{participant_nr}.svg")
     plt.legend()
+    plt.savefig(f"plots/median_curve_participant_{participant_nr}.svg")
     plt.show()
 
 # Solution Using Subplot, sadly I did not get the subplot in a good format for the protocol
