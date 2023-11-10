@@ -2,9 +2,23 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+from sklearn import preprocessing
+
+import warnings
+
+warnings.filterwarnings("ignore")
 
 
-def resize(data, target_length):
+def has_missing_value(row):
+    acc_data = row.iloc[1:]
+    nona_count = acc_data.dropna().count()
+    first_nona_count_values = acc_data[:nona_count]
+    # If a row has 100 values that are not na, there are no missing values if the first 100 values have 0 not na values
+    return first_nona_count_values.dropna().count() != nona_count
+
+
+# Used for resizing the acceleration data using interpolation
+def resize_acc_data(data, target_length):
     data_nona = data.dropna()
     x_data = np.arange(0, data_nona.shape[0])
     interpolate = interp1d(x_data, data_nona, kind='linear')
@@ -13,40 +27,118 @@ def resize(data, target_length):
     )
 
 
-def plot_interpolated_gesture(df, gesture, plt_axis, gesture_length=100, participant_nr=None):
-    gestures_df = df[df[0] == gesture]
-    if participant_nr is not None:
-        gestures_df = gestures_df[gestures_df[1] == participant_nr]
+# Used to resize the whole dataframe
+def resize_df(df, target_length):
     resized_df = pd.DataFrame(
-        gestures_df.apply(lambda row: pd.Series(resize(row.iloc[3:], gesture_length)), axis=1)
+        df.apply(lambda row: pd.Series(resize_acc_data(row.iloc[1:], target_length)), axis=1),
     )
-    plt_axis.plot(resized_df.std(), label=gesture)
+    # Restore the labels
+    resized_df[0] = df.iloc[:, 0]
+    return resized_df
+
+
+# Plots all gestures in the dataset
+def plot_by_gestures(df, pre_title=""):
+    for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"]:
+        plt.figure()
+        plot_gesture_samples(df, gesture, plt)
+        plt.title(f"{pre_title} {gesture}")
+        plt.ylabel("x acceleration value")
+        plt.xlabel("time")
+        plt.savefig(f"plots/{pre_title.replace(' ', '_')}_{gesture}.svg")
+
+
+# Plots each sample for a given gesture
+def plot_gesture_samples(df, gesture, axs=plt):
+    gestures_df = df[df[0] == gesture]
+    acc_data = gestures_df.iloc[:, 1:].T
+    axs.plot(acc_data)
 
 
 df = pd.read_csv("raw_gesture_data_x_axis.csv", header=None)
 
+# The sampleNr and participantNr are not more necessary for this assignment
+df.drop(columns=[1, 2], inplace=True)
+
+# Outliers first try
+mean_data = pd.DataFrame()
+std_data = pd.DataFrame()
+
 for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"]:
-    plot_interpolated_gesture(df, gesture, plt, 150)
+    box_data_gesture = df[df[0] == gesture].iloc[:, 1:].T
+    mean_data[gesture] = box_data_gesture.mean().values
+    std_data[gesture] = box_data_gesture.std().values
 
-plt.title("Median Curve for all participants and all gestures")
-plt.xlabel("time")
-plt.ylabel("x accelerometer value")
-plt.savefig("plots/median_curve_all_participants.svg")
-plt.legend()
+mean_data.plot.box()
+plt.title("Mean distribution per gesture")
+plt.ylabel("mean x axis")
+plt.savefig(f"plots/mean_distribution_per_gesture.svg")
+
+std_data.plot.box()
+plt.title("Standard Deviation distribution per gesture")
+plt.ylabel("std x axis")
+plt.savefig(f"plots/std_distribution_per_gesture.svg")
 plt.show()
 
-fig, axs = plt.subplots(3, 3)
-fig.tight_layout(pad=1.5)
+#
+# plot_by_gestures(df, "original data")
+# plt.show()
 
-for participant_nr in range(9):
-    for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"]:
-        plt_axis = axs[int(participant_nr / 3), participant_nr % 3]
-        plot_interpolated_gesture(df, gesture, plt_axis, 150, participant_nr=participant_nr)
+# box_data.plot.box()
+# plt.show()
+# plt.savefig(f"plots/boxplot_lengths.svg")
 
-    plt_axis.set_title(f"Participant {participant_nr}")
-    plt_axis.set_xlabel("time")
-    plt_axis.set_ylabel("x acc")
 
-# plt.savefig("plots/median_curve_participant_0.svg")
-fig.legend(labels=["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"], loc="upper right")
-plt.show()
+# Missing Values
+# missing_values = df.apply(has_missing_value, axis=1)
+# print(f"The dataset has {missing_values.sum()} samples with missing values!")
+
+
+# resized_df_200 = resize_df(df, 200)
+# resized_df_100 = resize_df(df, 100)
+# resized_df_50 = resize_df(df, 50)
+
+# for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"]:
+#     gestures_figure, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+#     gestures_figure.suptitle(f"{gesture} gesture interpolation and resizing comparison")
+#     gestures_figure.tight_layout(pad=2)
+#
+#     ax1.set_title("Original Data")
+#     ax2.set_title("Resized to 200 values")
+#     ax3.set_title("Resized to 100 values")
+#     ax4.set_title("Resized to 50 values")
+#
+#     plot_gesture_samples(df, gesture, ax1)
+#     plot_gesture_samples(resized_df_200, gesture, ax2)
+#     plot_gesture_samples(resized_df_100, gesture, ax3)
+#     plot_gesture_samples(resized_df_50, gesture, ax4)
+#     gestures_figure.savefig(f"plots/interpolation_{gesture}.svg")
+#
+# plt.show()
+
+# resized_df = resize_df(df, 50)
+# plot_by_gestures(resized_df, pre_title="Resized data for gesture: ")
+# plt.show()
+
+
+# scaled_df = apply_to_df(df, lambda row: pd.Series(preprocessing.scale(row.iloc[3:])))
+# std_filtered_df = apply_to_df(scaled_df, lambda row: pd.Series(row.iloc[3:]).rolling(10).mean())
+
+
+# plt.show()
+
+# print(std_filtered_df)
+# Normalizing
+
+# Filtering
+
+
+# Features
+
+# Gesture Length in Acc Values
+# Number of Minimums
+# Number of Maximums
+# 1st Derivate
+# 2nd Derivate
+# Frequency Signal
+#
