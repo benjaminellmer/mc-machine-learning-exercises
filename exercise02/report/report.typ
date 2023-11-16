@@ -33,6 +33,7 @@
 #set page(
     numbering: "1 / 1",
 )
+#set heading(numbering: "1.")
 
 = Data Preprocessing
 
@@ -44,106 +45,152 @@ Then I counted the number of nan values for the first values.
 This means if the sample has 100 not nan values I took the first 100 values and counted the number of nan values.
 If the number of nan values in the first 100 values is 0, then there is no missing data in the sample.
 
-== Preprocessing - Outliers
-My first idea to find outliers was visualizing the data using a boxplot. 
-Therefore, I visualized the standard deviation in @boxstd and the median in @boxmean for each gesture as boxplot:
-
-#figure(
-    caption: "Boxplot Standard Deviation",
-    image("images/std_distribution_per_gesture.svg")
-)<boxstd>
-
-#figure(
-    caption: "Boxplot mean",
-    image("images/mean_distribution_per_gesture.svg")
-)<boxmean>
-
-As we can see in the boxplots, each gesture shows some ouliers for both std and mean.
-On the std diagram, at least the simpler gestures (left, right, up, down, circles) do not seem to have very much outliers.
-But, especially the outliers of the triangle samples shows, that this analysis probably is not optimal.
-Therefore, I decided to visualize all samples for each gesture and analyze this diagrams.
-
-#pagebreak()
-
-In @left we can see that the blue line at the end is a clear outlier and should be removed.
-The brown line at the end is also an outlier but I decided not to remove it because it is only a little delayed.
-#figure(
-    caption: "left",
-    image("images/original_data_left.svg", height: 35%)
-)<left>
-
-@right (right) shows one clear outlier, the blue line, which will be removed.
-#figure(
-    caption: "right",
-    image("images/original_data_right.svg", height: 35%)
-)<right>
-
-#pagebreak()
-
-In @up we can see the light green sample at the end, which is an oultier, which will be removed.
-Additionally I removed the orange sample, which looks like a problem with the recording.
-#figure(
-    caption: "up",
-    image("images/original_data_up.svg", height: 35%)
-)<up>
-
-In @down we can see one clear outlier the brown line which has to be removed.
-#figure(
-    caption: "down",
-    image("images/original_data_down.svg", height: 35%)
-)<down>
-
-#pagebreak()
-
-@square shows some samples that seem to have much smaller values, but I do not think they should be removed.
-#figure(
-    caption: "square",
-    image("images/original_data_square.svg", height: 35%)
-) <square>
-
-@triangle shows two samples, where the gesture looks like it is very delayed, therefore I removed the green and the blue sample.
-#figure(
-    caption: "triangle",
-    image("images/original_data_triangle.svg", height: 35%)
-)<triangle>
-
-#pagebreak()
-
-@circleCw shows two samples the red and the grey one which seem to be outliers, therefore I removed both.
-#figure(
-    caption: "circleCw",
-    image("images/original_data_circleCw.svg", height: 35%)
-)<circleCw>
-
-In @circleCcw I can not recognize any outliers.
-#figure(
-    image("images/original_data_circleCcw.svg", height: 35%)
-)<circleCcw>
-
-#pagebreak()
-== Preprocessing - Normalization
-I decided to normalize the data using the scale function. 
-Normalizing does not affect the trend of the data, I just centers the data, therefore I did not create any plots.
-
-== Preprocessing - Filtering
-I decided to use filter to reduce the noise in the data, as suggested in the exercise hints.
-I tried the suggested filters (running mean, running median and SV).
-
-=== Running Mean
-=== Running Median
-=== SV Filter
-
 == Preprocessing - Feature Reduction
 To get an equal amount of acceleration values I interpolated the gesture data and took an equal amount of values for each sample.
 According to the description the sensor was recording with 100Hz and the max frequency that makes sense is 20Hz, this means 84.6 (423/5) values should be sufficient.
 Therefore, I visualized the comparison of the interpolated data for each gesture and using 50, 100 and 200 values compared to the original data.
 As a result I decided to continue to work with only 50 values, because I think it still shows the mandatory information.
-The comparisons can be seen on the next pages.
+The comparisons can be seen in @ainterpolations[Appendix Interpolations].
+
+== Preprocessing - Normalization
+I decided to normalize the data using scaling.
+@density shows the distribution of the data before and after normalization.
+The normalization was done, because it helps the models to work with the data.
+
+#figure(
+    image("images/density.svg", height: 40%)
+) <density>
+
+== Preprocessing - Filtering
+I decided to use filter to reduce the noise in the data, as suggested in the exercise hints.
+I tried the suggested filters (running mean, running median and savgol filter).
+
+In my opinion the savgol filter preservs the trends of the gestures best, therefore I continued with the data that was filtered using the savgol filter.
+The comparisons can be seen in @afiltering[Appendix Filters].
+Regarding the windowsize I tried some sizes and ended up with 8, but I think including theses plots here would be too much.
+
+/*
+== Preprocessing - Outliers
+Before preprocesssing, the data, it could see a trend in all samples, but they were very different from each others.
+This means, I could find many outliers looking on column values, their stds or their means, therefore I decided to first preprocess the data and search for outliers afterwards.
+*/
+
+== Preprocessing - Feature Addition
+In the last exercise we already saw, that there is a correlation between the length of a sample and the gesture type.
+But, by processing the samples to get samples with equal lenghts, we lost this information.
+Therefore, I added it manually as an extra feature, describing the original length of the recording.
 
 #pagebreak()
 
-#image("images/interpolation_left.svg", height: 45%)
-#image("images/interpolation_right.svg", height: 45%)
+= Feature Extraction
+Yes I think it makes sense to derive more features besides the acceleration values, or at least try and look if there might be ones that make sense.
+I chose to extract the following features:
+- mean
+- median
+- standard deviation
+- min
+- max
+- innerquartile range
+- median absolute deviation
+- zero crossing rate
+- median crossing rate
+- number of maximas
+- number of minimas
+- 1st derivative of the acceleration values
+- 2nd derivative of the acceleration values
+- wavelet transformation
+- frequency power
+- frequency angle
+- autocorrelation
+
+Afterwards I selected the best features.....
+
+#pagebreak()
+
+== Feature Extraction - Mean
+By normalizing the data during the preprocessing, the mean was "destroyed", therefore I had to use the mean of the original data.
+In @mean we can sense, that this value was calculated before preprocessing the data, especially looking on the amount of outliers.
+#figure(
+    image("images/mean_values_per_gesture.svg", height: 35%)
+) <mean>
+
+== Feature Extraction - Median
+The median could be taken from the preprocessed data in @median it looks like there is at least some correlation with the gesture types.
+#figure(
+    image("images/median_values_per_gesture.svg", height: 35%)
+) <median>
+
+== Feature Extraction - Standard Deviation
+Same as with the mean, the std had to be taken from the original data.
+In @std we can see that the std is more robust compared to the mean in @mean, still there is a great amount of outliers.
+#figure(
+    image("images/std_values_per_gesture.svg", height: 35%)
+) <std>
+
+== Feature Extraction - Min value
+@min shows the correlation between the min value and the gesture types.
+It seems like there is at least some correlation, espeically the gestures left and right and the circles have very high minimum values.
+#figure(
+    image("images/min_values_per_gesture.svg", height: 35%)
+) <min>
+
+== Feature Extraction - Max value
+@max shows that the max value does not correlate very good with the gesture type.
+#figure(
+    image("images/max_values_per_gesture.svg", height: 35%)
+) <max>
+
+== Feature Extraction - Zero Crossing Rate
+@zerocrossings shows the number of zero crossings per gesture, which looks like a potentially good feature.
+#figure(
+    image("images/zero_crossings_per_gesture.svg", height: 35%)
+) <zerocrossings>
+
+== Feature Extraction - Median Crossing Rate
+@mediancrossings shows the number of median crossings per gesture, which does not look as promising compared to the zero crossing rate in @zerocrossings.
+#figure(
+    image("images/median_crossings_per_gesture.svg", height: 35%)
+) <mediancrossings>
+
+== Feature Extraction - number of maximas 
+I calculated the number of maximas per gesture, because I thought this information would be a very good feature.
+But looking at @maximas we can see that this is not the case.
+Still I kept it and waited for the PCA, to tell us how good this feature is.
+
+#figure(
+    image("images/maximas_per_gesture.svg", height: 35%)
+) <maximas>
+
+== Feature Extraction - number of minimas 
+Same as with the maximas, we can see in @minimas that the number of minimas probably not a good feature.
+#figure(
+    image("images/minimas_per_gesture.svg", height: 35%)
+) <minimas>
+
+
+
+== Feature Extraction - 1st. derivative
+plot by gesture?
+
+== Feature Extraction - 2nd. derivative
+plot by gesture? 
+
+== Feature Extraction - frequency transformation
+dont know how to plot
+
+== Feature Extraction - autocorrelation function
+dont know how to calculate
+
+== Feature Extraction - wavelets
+dont understand
+
+#pagebreak()
+
+= Appendix
+
+== Appendix Interpolations <ainterpolations>
+#image("images/interpolation_left.svg", height: 40%)
+#image("images/interpolation_right.svg", height: 40%)
 #image("images/interpolation_up.svg", height: 45%)
 #image("images/interpolation_down.svg", height: 45%)
 #image("images/interpolation_square.svg", height: 45%)
@@ -151,18 +198,15 @@ The comparisons can be seen on the next pages.
 #image("images/interpolation_circleCw.svg", height: 45%)
 #image("images/interpolation_circleCcw.svg", height: 45%)
 
-== Preprocessing - Feature Addition
+#pagebreak()
 
-/*
-#figure(
-image("images/all_participants.png")
-)
-*/
-
-See appendix for the comparison plots of all gestures.
-
-
-= Feature Extraction
-
-= Plots Appendix
+== Appendix Filtering <afiltering>
+#image("images/filter_left.svg", height: 40%)
+#image("images/filter_right.svg", height: 40%)
+#image("images/filter_up.svg", height: 45%)
+#image("images/filter_down.svg", height: 45%)
+#image("images/filter_square.svg", height: 45%)
+#image("images/filter_triangle.svg", height: 45%)
+#image("images/filter_circleCw.svg", height: 45%)
+#image("images/filter_circleCcw.svg", height: 45%)
 
