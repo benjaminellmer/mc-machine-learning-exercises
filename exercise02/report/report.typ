@@ -84,34 +84,74 @@ Therefore, I added it manually as an extra feature, describing the original leng
 
 = Feature Extraction
 Yes I think it makes sense to derive more features besides the acceleration values, or at least try and look if there might be ones that make sense.
-I chose to extract the following features:
+I chose to extract the following features.
+
+*Based on the x-axis data (preprocessed):*
+- raw values
+- min
+- max
 - mean
 - median
 - standard deviation
-- min
-- max
 - innerquartile range
 - median absolute deviation
-- zero crossing rate
-- median crossing rate
 - number of maximas
 - number of minimas
-- 1st derivative of the acceleration values
-- 2nd derivative of the acceleration values
-- wavelet transformation
+- zero crossing rate
+- median crossing rate
 - frequency power
 - frequency angle
 - autocorrelation
+*Based on the 1st derivative of the x-axis data:*
+- raw values
+- min
+- max
+- mean
+- median
+- standard deviation
+- innerquartile range
+- median absolute deviation
+- autocorrelation
+#pagebreak()
+*Based on the 2nd derivative of the x-axis data:*
+- raw values
+- min
+- max
+- mean
+- median
+- standard deviation
+- innerquartile range
+- median absolute deviation
+- autocorrelation
+*Based on the wavelet transformation of the x-axis data:*
+- raw values
+- min
+- max
+- mean
+- median
+- standard deviation
+- innerquartile range
+- median absolute deviation
+- autocorrelation
 
-Afterwards I selected the best features.....
+Afterwards I evaluated the features and chose the most promising ones, as described in ... .
+This will be described in depth in the next assignment.
 
+#pagebreak()
+
+== Raw x-axis data
+== 1st derivative of x-axis data
+== 2nd derivative of x-axis data
+== Wavelet transformation of x-axis data
+
+/* 
 #pagebreak()
 
 == Feature Extraction - Mean
 By normalizing the data during the preprocessing, the mean was "destroyed", therefore I had to use the mean of the original data.
 In @mean we can sense, that this value was calculated before preprocessing the data, especially looking on the amount of outliers.
 #figure(
-    image("images/mean_values_per_gesture.svg", height: 35%)
+    image("../plots/mean_values_per_gesture.svg", height: 35%)
 ) <mean>
 
 == Feature Extraction - Median
@@ -139,6 +179,10 @@ It seems like there is at least some correlation, espeically the gestures left a
 #figure(
     image("images/max_values_per_gesture.svg", height: 35%)
 ) <max>
+
+== Feature Extraction - Innerquartile Range
+
+== Feature Extraction - Median Absolute deviation (MAD)
 
 == Feature Extraction - Zero Crossing Rate
 @zerocrossings shows the number of zero crossings per gesture, which looks like a potentially good feature.
@@ -183,6 +227,7 @@ dont know how to calculate
 
 == Feature Extraction - wavelets
 dont understand
+*/
 
 #pagebreak()
 

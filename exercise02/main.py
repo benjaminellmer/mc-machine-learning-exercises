@@ -69,6 +69,22 @@ def boxplot_by_gestures(df, y_label="", title=""):
     plt.savefig(f"plots/{title.replace(' ', '_')}.svg")
 
 
+def sub_boxplot_by_gestures(df, title="", ax=plt):
+    df_with_labels = df.copy(deep=True)
+    df_with_labels["gesture"] = original_df.iloc[:, 0]
+    boxplot_data = pd.DataFrame()
+    for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"]:
+        gesture_data = df_with_labels[df_with_labels["gesture"] == gesture]
+        gesture_short_text = gesture[0]
+        if gesture == "circleCw":
+            gesture_short_text = gesture_short_text + "Cw"
+        if gesture == "circleCcw":
+            gesture_short_text = gesture_short_text + "Ccw"
+        boxplot_data[gesture_short_text] = gesture_data[0].T.values
+    boxplot_data.boxplot(ax=ax)
+    ax.set_title(title)
+
+
 # Plots each sample for a given gesture
 def plot_gesture_samples(df, gesture, axs=plt):
     gestures_df = df[df["gesture"] == gesture]
@@ -115,16 +131,14 @@ scaled_df = resized_df_50.apply(
     lambda row: pd.Series(preprocessing.scale(row.iloc[0:50])), axis=1
 )
 
-print(scaled_df)
+# fig, (ax1, ax2) = plt.subplots(ncols=2)
+# ax1.set_title("Acceleration data before scaling")
+# ax2.set_title("Acceleration data after scaling")
 
-fig, (ax1, ax2) = plt.subplots(ncols=2)
-ax1.set_title("Acceleration data before scaling")
-ax2.set_title("Acceleration data after scaling")
-
-resized_df_50.plot.density(ax=ax1, legend=False)
-scaled_df.plot.density(ax=ax2, legend=False)
-plt.savefig("plots/density.svg")
-plt.show()
+# resized_df_50.plot.density(ax=ax1, legend=False)
+# scaled_df.plot.density(ax=ax2, legend=False)
+# plt.savefig("plots/density.svg")
+# plt.show()
 
 # Preprocessing - Outliers
 # left_data = resized_df_50[resized_df_50[0] == "left"]
@@ -136,9 +150,9 @@ std_filtered_df = scaled_df.apply(lambda row: pd.Series(row).rolling(8).mean())
 mean_filtered_df = scaled_df.apply(lambda row: pd.Series(row).rolling(8).std())
 sv_filtered_df = scaled_df.apply(lambda row: savgol_filter(row, 8, 2))
 
-print(std_filtered_df)
-print(mean_filtered_df)
-print(sv_filtered_df)
+# print(std_filtered_df)
+# print(mean_filtered_df)
+# print(sv_filtered_df)
 
 # Add labels for the plots...
 scaled_df["gesture"] = original_df.iloc[:, 0]
@@ -146,23 +160,25 @@ std_filtered_df["gesture"] = original_df.iloc[:, 0]
 mean_filtered_df["gesture"] = original_df.iloc[:, 0]
 sv_filtered_df["gesture"] = original_df.iloc[:, 0]
 
-for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"]:
-    gestures_figure, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-    gestures_figure.suptitle(f"{gesture} gesture Filter comparison")
-    gestures_figure.tight_layout(pad=2)
 
-    ax1.set_title("Data without Filter")
-    ax2.set_title("STD Filter window size 8")
-    ax3.set_title("Mean Filter window size 8")
-    ax4.set_title("Savgol Filter window size 8")
-
-    plot_gesture_samples(scaled_df, gesture, ax1)
-    plot_gesture_samples(std_filtered_df, gesture, ax2)
-    plot_gesture_samples(mean_filtered_df, gesture, ax3)
-    plot_gesture_samples(sv_filtered_df, gesture, ax4)
-    gestures_figure.savefig(f"plots/filter_{gesture}.svg")
-
-plt.show()
+#
+# for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"]:
+#     gestures_figure, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+#     gestures_figure.suptitle(f"{gesture} gesture Filter comparison")
+#     gestures_figure.tight_layout(pad=2)
+#
+#     ax1.set_title("Data without Filter")
+#     ax2.set_title("STD Filter window size 8")
+#     ax3.set_title("Mean Filter window size 8")
+#     ax4.set_title("Savgol Filter window size 8")
+#
+#     plot_gesture_samples(scaled_df, gesture, ax1)
+#     plot_gesture_samples(std_filtered_df, gesture, ax2)
+#     plot_gesture_samples(mean_filtered_df, gesture, ax3)
+#     plot_gesture_samples(sv_filtered_df, gesture, ax4)
+#     gestures_figure.savefig(f"plots/filter_{gesture}.svg")
+#
+# plt.show()
 #
 # # left_data = sv_filtered_df[sv_filtered_df[0] == "left"]
 # # first_col = left_data.iloc[:, 5]
@@ -187,26 +203,59 @@ plt.show()
 #
 # # Feature Extraction
 #
-# # Min
-# min_values = sv_filtered_df.apply(lambda row: pd.Series(row.iloc[0:50].min()), axis=1)
+
+def plot_raw_min_max_mean(raw_values, min_values, max_values, mean_values):
+    figure, ((raw_ax, min_ax), (max_ax, mean_ax)) = plt.subplots(2, 2)
+    figure.tight_layout(pad=2)
+
+    raw_ax.plot(raw_values)
+    raw_ax.set_title("Raw Data")
+    sub_boxplot_by_gestures(min_values, title="min values per gesture", ax=min_ax)
+    sub_boxplot_by_gestures(max_values, title="max values per gesture", ax=max_ax)
+    sub_boxplot_by_gestures(mean_values, title="mean values per gesture", ax=mean_ax)
+
+def plot_median_std_iqr_mad(median_values, std_values, iqr_values, mad_values):
+    figure, ((median_ax, std_ax), (iqr_ax, mad_ax)) = plt.subplots(2, 2)
+    figure.tight_layout(pad=2)
+
+    sub_boxplot_by_gestures(min_values, title="min values per gesture", ax=min_ax)
+    sub_boxplot_by_gestures(min_values, title="min values per gesture", ax=min_ax)
+    sub_boxplot_by_gestures(max_values, title="max values per gesture", ax=max_ax)
+    sub_boxplot_by_gestures(mean_values, title="mean values per gesture", ax=mean_ax)
+
+
+# Min
+min_values = sv_filtered_df.apply(lambda row: pd.Series(row.iloc[0:50].min()), axis=1)
 # boxplot_by_gestures(min_values, y_label="minimum value", title="min values per gesture")
-#
-# # Max
-# max_values = sv_filtered_df.apply(lambda row: pd.Series(row.iloc[0:50].max()), axis=1)
+
+# Max
+max_values = sv_filtered_df.apply(lambda row: pd.Series(row.iloc[0:50].max()), axis=1)
 # boxplot_by_gestures(max_values, y_label="maximum value", title="max values per gesture")
-#
-# # Mean
-# mean_values = original_df.apply(lambda row: pd.Series(row.iloc[3:].mean()), axis=1)
+
+# Mean
+mean_values = original_df.apply(lambda row: pd.Series(row.iloc[3:].mean()), axis=1)
 # boxplot_by_gestures(mean_values, y_label="mean", title="mean values per gesture")
-#
-# # Median
-# median_values = sv_filtered_df.apply(lambda row: pd.Series(row.iloc[0:50].median()), axis=1)
+
+
+# Median
+median_values = sv_filtered_df.apply(lambda row: pd.Series(row.iloc[0:50].median()), axis=1)
 # boxplot_by_gestures(median_values, y_label="median", title="median values per gesture")
-#
-# # STD
-# std_values = original_df.apply(lambda row: pd.Series(row.iloc[3:].std()), axis=1)
+
+# STD
+std_values = original_df.apply(lambda row: pd.Series(row.iloc[3:].std()), axis=1)
 # boxplot_by_gestures(std_values, y_label="std", title="std values per gesture")
-#
+
+# Inner Quartile Range
+iqr = sv_filtered_df.apply(lambda row: pd.Series(row.iloc[0:50].quantile(0.75) - row.iloc[0:50].quantile(0.25)), axis=1)
+
+# MAD
+mad_values = sv_filtered_df.apply(lambda row: pd.Series((row.iloc[0:50] - row.iloc[0:50].mean()).abs().mean()), axis=1)
+
+plot_raw_min_max_mean(sv_filtered_df.iloc[:, 0:50].T, min_values, max_values, mean_values)
+
+plt.show()
+
+
 #
 # # Zero Crossing Rate
 # def count_zero_crossings(row):
@@ -244,11 +293,36 @@ plt.show()
 #
 # # plt.show()
 #
-# # 1st Derivative
-# derivatives_1st = sv_filtered_df.apply(lambda row: pd.Series(np.diff(row.iloc[0:50])), axis=1)
-#
+
+gesture_lengths = original_df.iloc[:, 1:].T.count()
+
+# 1st Derivative
+derivatives_1st = sv_filtered_df.apply(lambda row: pd.Series(np.diff(row.iloc[0:50])), axis=1)
+
 # # 2nd Derivative
-# derivatives_2nd = derivatives_1st.apply(lambda row: pd.Series(np.diff(row.dropna())), axis=1)
+derivatives_2nd = derivatives_1st.apply(lambda row: pd.Series(np.diff(row.dropna())), axis=1)
+
+# corr_df = pd.DataFrame(gesture_lengths)
+# corr_df["gesture"] = original_df.iloc[:, 0]
+# corr_df['gesture'] = corr_df['gesture'].astype('category').cat.codes
+#
+# print(corr_df)
+#
+# print(corr_df.corr())
+#
+# correlations = corr_df.corr()
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# cax = ax.matshow(correlations, vmin=-1, vmax=1)
+# fig.colorbar(cax)
+# ticks = np.arange(0, len(corr_df.columns) + 1, 10)
+# ax.set_xticks(ticks)
+# ax.set_yticks(ticks)
+# ax.set_xticklabels(["0", "9", "18", "27", "36", "gesture"])
+# ax.set_yticklabels(["0", "10", "20", "30", "40", "gesture"])
+# plt.title("Correlations of raw accelerometer values")
+# plt.show()
+
 #
 #
 # def calc_power(row):
