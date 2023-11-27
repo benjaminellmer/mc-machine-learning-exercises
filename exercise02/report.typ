@@ -73,21 +73,21 @@ Those outliers are visualized in the figures @left-outliers, @right-outliers @up
 == Preprocessing - Feature Reduction
 To get an equal amount of acceleration values I interpolated the gesture data and took an equal amount of values for each sample.
 According to the description the sensor was recording with 100Hz and the max frequency that makes sense is 20Hz, this means 84.6 (423/5) values should be sufficient.
-Therefore, I visualized the comparison of the interpolated data for each gesture and using 50, 100 and 200 values compared to the original data.
+Therefore, I visualized the comparison of the interpolated data for each gesture using 50, 100 and 200 values compared to the original data.
 As a result I decided to continue to work with only 50 values, because I think it still shows the mandatory information.
 The comparisons can be seen in @ainterpolations[Appendix Interpolations].
 
 == Preprocessing - Normalization
 I decided to normalize the data using scaling.
 @density shows the distribution of the data before and after normalization.
-The normalization was done, because it helps the models to work with the data.
+The normalization was done, because it afterwards helps the models to work with the data.
 
 #figure(
     image("plots/density.svg", height: 40%)
 ) <density>
 
 == Preprocessing - Filtering
-I decided to use filter to reduce the noise in the data, as suggested in the exercise hints.
+I decided to use filtering to reduce the noise in the data, as suggested in the exercise hints.
 I tried the suggested filters (running mean, running median and savgol filter).
 
 In my opinion the savgol filter preservs the trends of the gestures best, therefore I continued with the data that was filtered using the savgol filter.
@@ -203,7 +203,7 @@ I created a plot that includes FFT power, phase and the ACF plots, but the creat
 
 #pagebreak()
 
-= Feature Selection <feature-selection>
+= Feature Selection/Discussion <feature-selection>
 First of all, I plotted the correlation matrix to get a picture of the correlations beyond the features.
 Because of the huge amount of features, it is hard to get any useful information out of the plot.
 I removed the ticks and labels, because the texts were overlapping.
@@ -213,13 +213,12 @@ I removed the ticks and labels, because the texts were overlapping.
 ) <correlations>
 
 Still, we can see in @correlations, that many features have a strong correlation and that we might be able to drop some of them.
-This is very interesting in the next assignment I will check which accuracy I can reach with only 10 features.
-
 
 #pagebreak()
 
 Then I chose PCA to look at the variance of the features.
 In @cumsum we can see that we should have about 99% variance with only 10 features.
+This is very interesting in the next assignment I will check which accuracy I can reach with only 10 features.
 
 #figure(
     image("plots/pca_cumsum.svg", height: 40%)
@@ -241,6 +240,7 @@ If there would not be much difference, all the extracted features would be usele
     image("plots/cross_validation_all.svg", height: 35%)
 ) <cv-all>
 
+In the next assignment I will look at the features and choose the best ones this assignment showed only that it makes sense to derive more features
 
 #pagebreak()
 

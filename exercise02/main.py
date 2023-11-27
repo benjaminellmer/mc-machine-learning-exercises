@@ -1,23 +1,19 @@
-import pandas
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn import decomposition
-import statsmodels.api as sm
+import warnings
+
 import pywt
-from sklearn import preprocessing
+import statsmodels.api as sm
 from scipy import signal
 from scipy.signal import savgol_filter
-from preprocessing_helper import *
-from feature_extraction_helper import *
-from selection_helper import *
+from sklearn import preprocessing
 from sklearn.feature_selection import RFECV  # recursive feature eliminiation with CV
-from sklearn.model_selection import KFold
-from sklearn.linear_model import SGDClassifier
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import mutual_info_classif
+from sklearn.linear_model import SGDClassifier
+from sklearn.model_selection import KFold
 
-import warnings
+from feature_extraction_helper import *
+from preprocessing_helper import *
+from selection_helper import *
 
 warnings.filterwarnings("ignore")
 
@@ -49,12 +45,12 @@ down_outliers = down_df[down_df.notna().sum(axis=1) > 200]
 triangle_outliers = triangle_df[triangle_df.notna().sum(axis=1) > 350]
 circleCw_outliers = circleCw_df[circleCw_df.notna().sum(axis=1) > 350]
 
-# original_df.drop(left_outliers.index, inplace=True)
-# original_df.drop(right_outliers.index, inplace=True)
-# original_df.drop(up_outliers.index, inplace=True)
-# original_df.drop(down_outliers.index, inplace=True)
-# original_df.drop(triangle_outliers.index, inplace=True)
-# original_df.drop(circleCw_outliers.index, inplace=True)
+original_df.drop(left_outliers.index, inplace=True)
+original_df.drop(right_outliers.index, inplace=True)
+original_df.drop(up_outliers.index, inplace=True)
+original_df.drop(down_outliers.index, inplace=True)
+original_df.drop(triangle_outliers.index, inplace=True)
+original_df.drop(circleCw_outliers.index, inplace=True)
 
 plot_outliers(original_df, left_outliers, "left")
 plot_outliers(original_df, right_outliers, "right")
@@ -173,8 +169,8 @@ plot_minimas_maximas_zcr_mcr(
 plt.savefig("plots/x_data_minimas_maximas_zcr_mcr.svg")
 
 # Caution this takes decades, because I plotted each row with its own command :/
-# plot_power_phase_acf(x_data_power_spectrum, x_data_phase_spectrum, sv_filtered_df)
-# plt.savefig("plots/x_data_power_phase_acf.svg")
+plot_power_phase_acf(x_data_power_spectrum, x_data_phase_spectrum, sv_filtered_df)
+plt.savefig("plots/x_data_power_phase_acf.svg")
 
 plot_wavelet(
     x_data_approx_coeff,

@@ -9,19 +9,21 @@ import seaborn as sns
 ########################################################################################################################
 # Feature Extraction Helper Function Definitions
 ########################################################################################################################
+def get_short_label(label):
+    if label == "circleCw":
+        return "cCw"
+    elif label == "circleCcw":
+        return "cCcw"
+    else:
+        return label[0]
+
+
 def sub_boxplot_by_gestures(df, labels, title="", ax=plt):
     df_with_labels = df.copy(deep=True)
-    df_with_labels["gesture"] = labels
-    boxplot_data = pd.DataFrame(index=None)
-    for gesture in ["left", "right", "up", "down", "square", "triangle", "circleCw", "circleCcw"]:
-        gesture_data = df_with_labels[df_with_labels["gesture"] == gesture]
-        gesture_short_text = gesture[0]
-        if gesture == "circleCw":
-            gesture_short_text = gesture_short_text + "Cw"
-        if gesture == "circleCcw":
-            gesture_short_text = gesture_short_text + "Ccw"
-        boxplot_data[gesture_short_text] = gesture_data[0].T.values
-    boxplot_data.boxplot(ax=ax)
+    short_labels = labels.apply(get_short_label)
+    df_with_labels["gesture"] = short_labels
+    df_with_labels.boxplot(ax=ax, by="gesture")
+    ax.set_xlabel("")
     ax.set_title(title)
 
 
